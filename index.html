@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Negocio de Tareas y Proyectos</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      display: flex;
+    }
+
+    .sidebar {
+      width: 250px;
+      background-color: #f2f2f2;
+      padding: 20px;
+      position: fixed;
+      right: 0;
+      top: 0;
+      height: 100vh;
+      border-left: 1px solid #ccc;
+    }
+
+    .sidebar h3 {
+      margin-top: 0;
+    }
+
+    .sidebar a {
+      display: block;
+      padding: 10px;
+      text-decoration: none;
+      color: #333;
+      border-bottom: 1px solid #ddd;
+      cursor: pointer;
+    }
+
+    .sidebar a:hover {
+      background-color: #ddd;
+    }
+
+    .main-content {
+      flex: 1;
+      padding: 20px;
+      margin-right: 270px;
+    }
+
+    .search-bar {
+      width: 100%;
+      margin-bottom: 20px;
+    }
+
+    .search-bar input[type="text"] {
+      width: 80%;
+      padding: 10px;
+      font-size: 16px;
+    }
+
+    .task-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+    }
+
+    .task {
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    .task img {
+      width: 100%;
+      height: 150px;
+      object-fit: cover;
+    }
+
+    .task p {
+      padding: 10px;
+    }
+
+    /* Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 999;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.6);
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-content {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      width: 300px;
+    }
+
+    .modal-content input {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+    }
+
+    .modal-content button {
+      padding: 10px;
+      width: 100%;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .logout-msg {
+      color: green;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Contenido principal -->
+  <div class="main-content">
+    <div class="search-bar">
+      <input type="text" placeholder="Buscar tarea, proyecto o materia...">
+    </div>
+
+    <div class="task-grid">
+      <div class="task">
+        <img src="https://via.placeholder.com/300x150?text=Ensayos" alt="Ensayos">
+        <p>Redacción de ensayos académicos personalizados. <br>
+          <button onclick="guardarProyecto('Ensayo')">Guardar Proyecto</button>
+        </p>
+      </div>
+      <div class="task">
+        <img src="https://via.placeholder.com/300x150?text=Investigaciones" alt="Investigaciones">
+        <p>Proyectos de investigación con fuentes confiables. <br>
+          <button onclick="guardarProyecto('Investigación')">Guardar Proyecto</button>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Barra lateral -->
+  <div class="sidebar">
+    <h3 id="user-info">Mi Cuenta</h3>
+    <a onclick="abrirLogin()">Iniciar Sesión</a>
+    <a href="#">Perfil</a>
+    <a onclick="mostrarGuardados()">Proyectos Guardados</a>
+    <a href="#">Mis Compras</a>
+    <a href="#">Mis Trabajos Encargados</a>
+    <a href="#">Configuración</a>
+    <a onclick="cerrarSesion()">Cerrar Sesión</a>
+    <p id="logout-msg" class="logout-msg hidden">Sesión cerrada.</p>
+  </div>
+
+  <!-- Modal de Login -->
+  <div class="modal" id="loginModal">
+    <div class="modal-content">
+      <h3>Iniciar Sesión</h3>
+      <input type="text" id="usuario" placeholder="Usuario">
+      <input type="password" id="contraseña" placeholder="Contraseña">
+      <button onclick="iniciarSesion()">Entrar</button>
+    </div>
+  </div>
+
+  <script>
+    const loginModal = document.getElementById('loginModal');
+    const logoutMsg = document.getElementById('logout-msg');
+
+    function abrirLogin() {
+      loginModal.style.display = 'flex';
+    }
+
+    function iniciarSesion() {
+      const usuario = document.getElementById('usuario').value;
+      const contraseña = document.getElementById('contraseña').value;
+
+      if (usuario === 'admin' && contraseña === '1234') {
+        localStorage.setItem('usuario', usuario);
+        document.getElementById('user-info').innerText = "Bienvenido, " + usuario;
+        loginModal.style.display = 'none';
+      } else {
+        alert("Credenciales incorrectas");
+      }
+    }
+
+    function cerrarSesion() {
+      localStorage.removeItem('usuario');
+      document.getElementById('user-info').innerText = "Mi Cuenta";
+      logoutMsg.classList.remove('hidden');
+      setTimeout(() => logoutMsg.classList.add('hidden'), 3000);
+    }
+
+    function guardarProyecto(nombre) {
+      let proyectos = JSON.parse(localStorage.getItem('proyectos')) || [];
+      proyectos.push(nombre);
+      localStorage.setItem('proyectos', JSON.stringify(proyectos));
+      alert("Proyecto guardado: " + nombre);
+    }
+
+    function mostrarGuardados() {
+      let proyectos = JSON.parse(localStorage.getItem('proyectos')) || [];
+      if (proyectos.length === 0) {
+        alert("No tienes proyectos guardados.");
+      } else {
+        alert("Tus proyectos guardados:\n" + proyectos.join('\n'));
+      }
+    }
+
+    // Cargar sesión si ya está iniciada
+    window.onload = () => {
+      const user = localStorage.getItem('usuario');
+      if (user) {
+        document.getElementById('user-info').innerText = "Bienvenido, " + user;
+      }
+    }
+
+    // Cerrar modal si se hace clic fuera
+    window.onclick = function(event) {
+      if (event.target === loginModal) {
+        loginModal.style.display = "none";
+      }
+    }
+  </script>
+</body>
+</html>
